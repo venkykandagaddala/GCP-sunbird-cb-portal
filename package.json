@@ -147,6 +147,7 @@
     "jasmine-core": "~3.5.0",
     "jasmine-spec-reporter": "~5.0.0",
     "jest-sonar-reporter": "^2.0.0",
+    "jest-localstorage-mock": "^2.4.26",
     "karma": "~6.4.4",
     "karma-chrome-launcher": "~3.1.0",
     "karma-coverage-istanbul-reporter": "~3.0.2",

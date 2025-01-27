@@ -17,7 +17,7 @@ export class EventSessionsComponent implements OnInit, OnDestroy {
   liveSpeaker: ISpeakerDetails[] = []
   sessionStartTime: number[] = []
   sessionEndTime: number[] = []
-  private currentSubscription: Subscription | null = null
+  currentSubscription: Subscription | null = null
 
   constructor(
     private activatedRoute: ActivatedRoute,
