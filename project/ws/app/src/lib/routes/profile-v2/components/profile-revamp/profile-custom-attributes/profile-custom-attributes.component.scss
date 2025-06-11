@@ -1,0 +1,17 @@
+.details-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 34px;
+}
+
+.label {
+  color: rgba(0, 0, 0, 0.6);
+  font: 400 12px Lato;
+}
+
+
+@media (max-width: 768px) {
+  .details-grid {
+    grid-template-columns: 1fr;
+  }
+}

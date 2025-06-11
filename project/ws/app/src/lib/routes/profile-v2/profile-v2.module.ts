@@ -73,6 +73,7 @@ import { MatLegacyCheckboxModule } from '@angular/material/legacy-checkbox'
 import { DragDropModule } from '@angular/cdk/drag-drop'
 import { CommunitySuggestionsComponent } from './components/profile-revamp/community-suggestions/community-suggestions.component'
 import { CertificateViewPopupComponent } from './components/profile-revamp/certificate-view-popup/certificate-view-popup.component'
+import { ProfileCustomAttributesComponent } from './components/profile-revamp/profile-custom-attributes/profile-custom-attributes.component'
 
 
 @NgModule({
@@ -99,7 +100,8 @@ import { CertificateViewPopupComponent } from './components/profile-revamp/certi
         ProfilePrimaryDetailsComponent,
         ProfileEntryEditComponent,
         CommunitySuggestionsComponent,
-        CertificateViewPopupComponent
+        CertificateViewPopupComponent,
+        ProfileCustomAttributesComponent,
     ],
     imports: [
         CommonModule,

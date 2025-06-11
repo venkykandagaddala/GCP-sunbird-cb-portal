@@ -200,7 +200,23 @@
               (getApprovalStatus)="getSendApprovalStatus()"></ws-app-profile-primary-details>
           </div>
 
-          <ng-container *ngIf="isCurrentUser || (serviceHistoryDetails && serviceHistoryDetails?.serviceHistoryList?.length > 0)">
+          <ng-container *ngIf="isCurrentUser">
+            <div id="custom-attr" class="user-details">
+              <div class="flex justify-between items-center mb-2">
+                <div class="section-header">Custom Attributes</div>
+                <ng-container *ngIf="isCurrentUser">
+                  <mat-icon class="add-icon"
+                    (click)="openProfileEntryEditDialogForCustomAttr('Custom Attributes')">add</mat-icon>
+                </ng-container>
+              </div>
+              <ng-container>
+                <ws-app-profile-custom-attributes [orgId]="orgId"></ws-app-profile-custom-attributes>
+              </ng-container>
+            </div>
+          </ng-container>
+
+          <ng-container
+            *ngIf="isCurrentUser || (serviceHistoryDetails && serviceHistoryDetails?.serviceHistoryList?.length > 0)">
             <div id="service-history" class="user-details">
               <div class="flex justify-between items-center mb-2">
                 <div class="section-header">Service History</div>
@@ -229,7 +245,9 @@
             </div>
           </ng-container> -->
 
-          <ng-container *ngIf="isCurrentUser || (educationalQualificationDetails && educationalQualificationDetails?.educationalQualifications?.length > 0)">
+
+          <ng-container
+            *ngIf="isCurrentUser || (educationalQualificationDetails && educationalQualificationDetails?.educationalQualifications?.length > 0)">
             <div id="educational-qualifications" class="user-details">
               <div class="flex justify-between items-center mb-2">
                 <div class="section-header">Educational Qualifications</div>
@@ -247,7 +265,8 @@
                 <ng-container *ngIf="educationalQualificationDetails?.count > 2">
                   <div class="flex flex-col justify-between items-center">
                     <div class="dividing-line"></div>
-                    <div class="show-all-text" (click)="openProfileEntryListDialog('Educational qualifications')">Show All
+                    <div class="show-all-text" (click)="openProfileEntryListDialog('Educational qualifications')">Show
+                      All
                     </div>
                   </div>
                 </ng-container>
@@ -255,7 +274,8 @@
             </div>
           </ng-container>
 
-          <ng-container *ngIf="isCurrentUser || (achievementsDetails && achievementsDetails?.achievementsList?.length > 0)">
+          <ng-container
+            *ngIf="isCurrentUser || (achievementsDetails && achievementsDetails?.achievementsList?.length > 0)">
             <div id="achievements" class="user-details">
               <div class="flex justify-between items-center mb-2">
                 <div class="section-header">Achievements</div>

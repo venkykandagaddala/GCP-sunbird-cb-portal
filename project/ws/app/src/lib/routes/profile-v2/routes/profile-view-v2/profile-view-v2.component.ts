@@ -208,7 +208,7 @@ export class ProfileViewV2Component implements OnInit, AfterViewInit, OnDestroy 
     private breakpointObserver: BreakpointObserver,
     private translateService: TranslateService
   ) {
-     this.breakpointObserver.observe([Breakpoints.Handset])
+    this.breakpointObserver.observe([Breakpoints.Handset])
       .subscribe(result => {
         this.isMobile = result.matches;
       });
@@ -239,7 +239,7 @@ export class ProfileViewV2Component implements OnInit, AfterViewInit, OnDestroy 
     this.checkIsMentor()
 
     this.getInsightsData()
-    
+
   }
 
   //#region (initialization)
@@ -333,7 +333,7 @@ export class ProfileViewV2Component implements OnInit, AfterViewInit, OnDestroy 
       profileStatus: _.get(this.profesionalDetails, 'profileStatus', ''),
     }
     this.aboutme = _.get(this.profesionalDetails, 'employmentDetails.aboutme', '')
-    if(!this.isCurrentUser && this.aboutme !== '') {
+    if (!this.isCurrentUser && this.aboutme !== '') {
       this.filterProfileRoutes('about-me')
     }
   }
@@ -356,7 +356,7 @@ export class ProfileViewV2Component implements OnInit, AfterViewInit, OnDestroy 
   }
 
   setUserStats() {
-    if(this.userStats && this.userStats.length > 0 && this.profesionalDetails) {
+    if (this.userStats && this.userStats.length > 0 && this.profesionalDetails) {
       this.userStats.forEach((userStat: UserStats) => {
         switch (userStat.identifier) {
           case 'karmaPoints':
@@ -382,14 +382,14 @@ export class ProfileViewV2Component implements OnInit, AfterViewInit, OnDestroy 
     this.achievementsDetails.count = _.get(entries, 'achievements.count', 0)
     this.locationDetails = _.get(entries, 'locationDetails.data[0]', {})
 
-    if(!this.isCurrentUser) {
+    if (!this.isCurrentUser) {
       if (_.get(this.serviceHistoryDetails, 'serviceHistoryList', []).length === 0) {
         this.filterProfileRoutes('service-history')
       }
       if (_.get(this.educationalQualificationDetails, 'educationalQualifications', []).length === 0) {
         this.filterProfileRoutes('educational-qualifications')
       }
-      if(_.get(this.achievementsDetails, 'achievementsList', []).length === 0) {
+      if (_.get(this.achievementsDetails, 'achievementsList', []).length === 0) {
         this.filterProfileRoutes('achievements')
       }
     }
@@ -709,9 +709,9 @@ export class ProfileViewV2Component implements OnInit, AfterViewInit, OnDestroy 
         const currentValue = _.get(result, mapping.resultPath, null);
         const formValue = this.primaryDetails[mapping.formField];
 
-        if ((formValue !== currentValue && currentValue !== null) && 
-           (
-            (formValue === 'NA' && currentValue !== '') || 
+        if ((formValue !== currentValue && currentValue !== null) &&
+          (
+            (formValue === 'NA' && currentValue !== '') ||
             formValue !== 'NA'
           )) {
           const pathParts = mapping.formBodyPath.split('.');
@@ -886,7 +886,7 @@ export class ProfileViewV2Component implements OnInit, AfterViewInit, OnDestroy 
     const dialogDetails = {
       header: header,
       userId: this.userId,
-      isCurrentUser : this.isCurrentUser || false
+      isCurrentUser: this.isCurrentUser || false
     }
     switch (header) {
       case 'Service History':
@@ -946,6 +946,26 @@ export class ProfileViewV2Component implements OnInit, AfterViewInit, OnDestroy 
     })
   }
 
+  openProfileEntryEditDialogForCustomAttr(header: string, entryDetails?: any) {
+    const dialogDetails = {
+      header: header,
+      entryDetails: entryDetails,
+      orgId: this.orgId
+    }
+    const isNew = entryDetails ? false : true
+    const dialogRef = this.dialog.open(ProfileEntryEditComponent, {
+      data: dialogDetails,
+      disableClose: true,
+      panelClass: 'dialog_sidenav',
+      autoFocus: false
+    })
+    dialogRef.afterClosed().subscribe(async (result: any) => {
+      if (result) {
+        console.log(result)
+        console.log(isNew)
+      }
+    })
+  }
 
   //#region (profile entry edit)
   async openProfileEntryEditDialog(header: string, entryDetails?: any) {
@@ -1128,19 +1148,19 @@ export class ProfileViewV2Component implements OnInit, AfterViewInit, OnDestroy 
   }
 
   copyProfileLink() {
-  const currentUrl = window.location.href; // Get the current URL
-  navigator.clipboard.writeText(currentUrl) // Copy the URL to the clipboard
-    .then(() => {
-      this.openSnackbar('Profile link copied to clipboard'); // Notify the user
-    })
-    .catch(() => {
-      this.openSnackbar('Failed to copy profile link'); // Handle errors
-    });
-}
+    const currentUrl = window.location.href; // Get the current URL
+    navigator.clipboard.writeText(currentUrl) // Copy the URL to the clipboard
+      .then(() => {
+        this.openSnackbar('Profile link copied to clipboard'); // Notify the user
+      })
+      .catch(() => {
+        this.openSnackbar('Failed to copy profile link'); // Handle errors
+      });
+  }
 
-sendConnectionRequest(): void {
-  const currentUser = this.configSvc.userProfile
-    if(this.userId && currentUser) {
+  sendConnectionRequest(): void {
+    const currentUser = this.configSvc.userProfile
+    if (this.userId && currentUser) {
       const formBody = {
         connectionId: this.userId,
         userIdFrom: _.get(currentUser, 'userId', ''),

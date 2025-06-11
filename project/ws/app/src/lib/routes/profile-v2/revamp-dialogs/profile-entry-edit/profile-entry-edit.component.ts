@@ -44,6 +44,8 @@ export class ProfileEntryEditComponent implements OnInit {
 
   disableUpload = false;
   disableUrl = false;
+
+  customAttrList: any[] = []
   constructor(
     private fb: FormBuilder,
     private dialogRef: MatLegacyDialogRef<ProfileEntryEditComponent>,
@@ -56,6 +58,7 @@ export class ProfileEntryEditComponent implements OnInit {
     this.entryDetails = _.get(this.data, 'entryDetails', '');
   }
   ngOnInit(): void {
+    console.log("data ", this.data)
     this.initForm();
   }
 
@@ -72,9 +75,44 @@ export class ProfileEntryEditComponent implements OnInit {
       case 'Achievements':
         this.createAchievementsForm();
         break;
+      case 'Custom Attributes':
+        this.createCustomAttributesForm();
+        break;
     }
   }
   //#endregion (intialization)
+
+
+  //#region (Custom Attributes)
+  private createCustomAttributesForm(): void {
+
+    this.entryForm = this.fb.group({
+    })
+    this.getCustomAttributes()
+
+  }
+  //#endregion (Custom Attributes)
+
+  //#region (Get custom attributes)
+  getCustomAttributes(): void {
+    let payload = {
+      filterCriteriaMap: {
+        organisationId: this.data.orgId,
+      },
+      requestedFields: [],
+      pageNumber: 0,
+      pageSize: 50,
+      orderDirection: "DESC",
+      orderBy: 'updatedOn',
+      facets: []
+    }
+    this.ProfileV2RevampService.fetchCustomFields(payload).subscribe((res: any) => {
+      this.customAttrList = _.get(res, 'result.searchResults.data', [])
+      this.buildDynamicForm()
+    })
+
+  }
+  //#endregion (end of Custom Attributes)
 
   //#region (service history)
   private createServiceHistoryForm(): void {
@@ -140,6 +178,24 @@ export class ProfileEntryEditComponent implements OnInit {
         }
       }, 10)
     }
+  }
+  //#endregion (service history)
+
+  buildDynamicForm() {
+    const formControls: { [key: string]: any } = {}
+    const activeFields = this.customAttrList.filter(field => field.isActive)
+    activeFields.forEach(field => {
+      const validators = []
+      if (field.isMandatory) {
+        validators.push(Validators.required);
+      }
+      if (field.validation) {
+        validators.push(Validators.pattern(new RegExp(field.validation)))
+      }
+      formControls[field.attributeName] = ['', validators]
+    })
+    this.entryForm = this.fb.group(formControls)
+    console.log("this.entryForm ", this.entryForm)
   }
 
   getOrgList() {

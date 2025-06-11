@@ -43,6 +43,7 @@ const API_END_POINTS = {
   INSIGHTS: `apis/proxies/v8/read/user/insights`, //old
   // ASSESSMENT_DATA: `apis/proxies/v8/wheebox/read`, //old
 
+  ORG_CUSTOM_FIELDS: `apis/proxies/v8/customFields/v1/search`
 }
 
 @Injectable({
@@ -229,5 +230,9 @@ export class ProfileV2RevampService {
   // getAssessmentinfo(): Observable<any> {
   //     return this.http.get(API_END_POINTS.ASSESSMENT_DATA)
   //   }
+
+  fetchCustomFields(requestBody: any): Observable<any> {
+    return this.http.post<any>(API_END_POINTS.ORG_CUSTOM_FIELDS, requestBody)
+  }
 
 }

@@ -1,0 +1,6 @@
+<div class="details-grid">
+  <div class="flex flex-col gap-2 pr-3" *ngFor="let item of customAttrList">
+    <span class="label">{{item?.name}}</span>
+    <span class="value">{{item?.value || 'Default'}}</span>
+  </div>
+</div>
