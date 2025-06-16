@@ -240,6 +240,14 @@ export class ProfileViewV2Component implements OnInit, AfterViewInit, OnDestroy 
 
     this.getInsightsData()
 
+    this.activatedRoute.fragment.subscribe(fragment => {
+      if (fragment === 'customAttr') {
+        setTimeout(() => {
+          this.openProfileEntryEditDialogForCustomAttr('Custom Attributes')
+        }, 500)
+      }
+    })
+
   }
 
   //#region (initialization)
@@ -950,7 +958,8 @@ export class ProfileViewV2Component implements OnInit, AfterViewInit, OnDestroy 
     const dialogDetails = {
       header: header,
       entryDetails: entryDetails,
-      orgId: this.orgId
+      orgId: this.orgId,
+      //orgId: '0140788510336040962'
     }
     const isNew = entryDetails ? false : true
     const dialogRef = this.dialog.open(ProfileEntryEditComponent, {

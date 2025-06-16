@@ -18,6 +18,8 @@ export class ProfileCustomAttributesComponent implements OnInit {
     let payload = {
       filterCriteriaMap: {
         organisationId: this.orgId,
+        //organisationId: '0140788510336040962',
+        isEnabled: true
       },
       requestedFields: [],
       pageNumber: 0,
