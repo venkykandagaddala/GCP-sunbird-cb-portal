@@ -118,11 +118,47 @@ export class NotificationsService {
     }
   }
 
+  handleEventRedirection(notification: any, environment: any): void {
+    if (notification.sub_category === 'EVENT_PUBLISHED') {
+      this.router.navigate([`/app/event-hub/home/${notification.message.data.id}`])
+    } else if (notification.sub_category === 'EVENT_ENROLLED') {
+      let url = `${environment.portalsForNotifications.mdo}/app/home/events`
+      window.open(url, '_blank')
+    }
+  }
+
+  handleProfileRedirection(notification: any, environment: any, snackBar: any) {
+    if (notification.sub_category === 'PROFILE_VERIFICATION' || notification.sub_category === 'USER_TRANSFER') {
+      let payload = this.constrctPayload(notification)
+      this.searchWorkflowSearch(payload).subscribe((res: any) => {
+        let data = _.get(res, 'result.data', [])
+        let pendingUser = data.find((item: any) => {
+          return item.wfInfo[0] && item.wfInfo[0].userId === notification.message.data.id
+        })
+        if (pendingUser) {
+          let url = `${environment.portalsForNotifications.mdo}/app/home/approvals/approval`
+          window.open(url, '_blank')
+        } else if (notification.sub_category === 'PROFILE_VERIFICATION') {
+          snackBar.open('This request has been resolved or is no longer available.')
+        } else if (notification.sub_category === 'USER_TRANSFER') {
+          snackBar.open('This request has been resolved or is no longer available.')
+        }
+      }, error => {
+        console.error('Error while fetching workflow search data', error)
+        snackBar.open('Error while fetching approval data')
+      })
+    } else if (['ACCEPTED_USER_TRANSFER', 'REJECTED_USER_TRANSFER',
+      'ACCEPTED_USER_PROFILE_VERIFICATION', 'REJECTED_USER_PROFILE_VERIFICATION'].includes(notification.sub_category)) {
+      this.router.navigate([`/app/person-profile/me#profileInfo`])
+    }
+
+  }
+
   handleRedirection(notification: any, environment: any, roles: any[], snackBar: any): void {
     if (notification.category === 'LEARN') {
       this.router.navigate([`/app/toc/${notification.message.data.id}`])
     } else if (notification.category === 'EVENT') {
-      this.router.navigate([`/app/event-hub/home/${notification.message.data.id}`])
+      this.handleEventRedirection(notification, environment)
     } else if (notification.category === 'DISCUSSION') {
       this.router.navigate([`/app/discussion-forum-v2/community/${notification.message.data.communityId}/${notification.message.data.discussionId}`])
     } else if (notification.category === 'NETWORK') {
@@ -152,25 +188,9 @@ export class NotificationsService {
         }
       })
     } else if (notification.category === 'PROFILE') {
-      let payload = this.constrctPayload(notification)
-      this.searchWorkflowSearch(payload).subscribe((res: any) => {
-        let data = _.get(res, 'result.data', [])
-        let pendingUser = data.find((item: any) => {
-          return item.wfInfo[0] && item.wfInfo[0].userId === notification.message.data.id
-        })
-        if (pendingUser) {
-          let url = `${environment.portalsForNotifications.mdo}/app/home/approvals/approval`
-          window.open(url, '_blank')
-        } else if (notification.sub_category === 'PROFILE_VERIFICATION') {
-          snackBar.open('This request has been resolved or is no longer available.')
-        } else if (notification.sub_category === 'USER_TRANSFER') {
-          snackBar.open('This request has been resolved or is no longer available.')
-        }
-      }, error => {
-        console.error('Error while fetching workflow search data', error)
-        snackBar.open('Error while fetching approval data')
-      })
-
+      this.handleProfileRedirection(notification, environment, snackBar)
+    } else if (notification.category === 'LEARN_CONTENT') {
+      this.router.navigate([`/app/toc/${notification.message.data.id}`])
     }
   }
 }
