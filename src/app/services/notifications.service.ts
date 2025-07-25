@@ -155,6 +155,7 @@ export class NotificationsService {
   }
 
   handleRedirection(notification: any, environment: any, roles: any[], snackBar: any): void {
+    debugger
     if (notification.category === 'LEARN') {
       this.router.navigate([`/app/toc/${notification.message.data.id}`])
     } else if (notification.category === 'EVENT') {
@@ -163,7 +164,7 @@ export class NotificationsService {
       this.router.navigate([`/app/discussion-forum-v2/community/${notification.message.data.communityId}/${notification.message.data.discussionId}`])
     } else if (notification.category === 'NETWORK') {
       this.handleNetworkRedirection(notification, snackBar)
-    } else if (notification?.category?.includes('CONTENT')) {
+    } else if (notification?.category === 'CONTENT') {
       this.getContentData(notification.message.data.id).subscribe((res: any) => {
         let isStandaloneResource = false
         if (res.primaryCategory === 'Learning Resource' &&
@@ -190,6 +191,8 @@ export class NotificationsService {
     } else if (notification.category === 'PROFILE') {
       this.handleProfileRedirection(notification, environment, snackBar)
     } else if (notification.category === 'LEARN_CONTENT') {
+      this.router.navigate([`/app/toc/${notification.message.data.id}`])
+    } else if (notification.category === 'LEARN_DISCUSSION') {
       this.router.navigate([`/app/toc/${notification.message.data.id}`])
     }
   }
