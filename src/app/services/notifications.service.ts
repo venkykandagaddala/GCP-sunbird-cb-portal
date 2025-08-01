@@ -155,7 +155,6 @@ export class NotificationsService {
   }
 
   handleRedirection(notification: any, environment: any, roles: any[], snackBar: any): void {
-    debugger
     if (notification.category === 'LEARN') {
       this.router.navigate([`/app/toc/${notification.message.data.id}`])
     } else if (notification.category === 'EVENT') {
@@ -191,9 +190,13 @@ export class NotificationsService {
     } else if (notification.category === 'PROFILE') {
       this.handleProfileRedirection(notification, environment, snackBar)
     } else if (notification.category === 'LEARN_CONTENT') {
-      this.router.navigate([`/app/toc/${notification.message.data.id}`])
+      this.router.navigate([`/app/toc/${notification.message.data.id[0]}`])
     } else if (notification.category === 'LEARN_DISCUSSION') {
       this.router.navigate([`/app/toc/${notification.message.data.id}`])
     }
+  }
+
+  handleConetentRedirection(content: any): void {
+    this.router.navigate([`/app/toc/${content.identifier}`])
   }
 }

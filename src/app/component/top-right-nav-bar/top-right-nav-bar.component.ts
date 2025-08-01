@@ -205,8 +205,17 @@ export class TopRightNavBarComponent implements OnInit, OnChanges {
 
   viewAllClick(event: any) {
     if (event.category) {
-      this.raiseTelemetryEventForNotification(event)
-      this.notificationsService.handleRedirection(event, environment, this.roles, this.snackBar)
+      if (event.category === 'LEARN_CONTENT') {
+        if (event.message && event.message.data && event.message.data.id.length === 1) {
+          this.raiseTelemetryEventForNotification(event)
+          this.notificationsService.handleRedirection(event, environment, this.roles, this.snackBar)
+        } else {
+          this.router.navigate(['/app/notifications'], { queryParams: { tab: 'all' }, fragment: event.notification_id })
+        }
+      } else {
+        this.raiseTelemetryEventForNotification(event)
+        this.notificationsService.handleRedirection(event, environment, this.roles, this.snackBar)
+      }
     } else {
       this.router.navigate(['/app/notifications'], { queryParams: { tab: event } })
     }
