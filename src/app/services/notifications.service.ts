@@ -151,7 +151,24 @@ export class NotificationsService {
       'ACCEPTED_USER_PROFILE_VERIFICATION', 'REJECTED_USER_PROFILE_VERIFICATION'].includes(notification.sub_category)) {
       this.router.navigate([`/app/person-profile/me#profileInfo`])
     }
+  }
 
+  handleDiscussionRedirection(notification: any, environment: any, roles: any[]): void {
+    if (notification.sub_category === 'LEARN_DISCUSSION_POST_COMMENT' || notification.sub_category === 'LEARN_DISCUSSION_POST_REPLY') {
+      if (roles.includes('CONTENT_CREATOR')) {
+        let url = `${environment.portalsForNotifications.cbp}/author/content-detail/${notification.message.data.courseId}/overview-v2?preview=true&editMode=true&commentId=7fe10b02-71fb-11f0-92af-c58d19390120`
+        window.open(url, '_blank')
+      } else {
+        this.router.navigate([`/app/toc/${notification.message.data.courseId}`],
+          {
+            queryParams: {
+              commentId: "7fe10b02-71fb-11f0-92af-c58d19390120"
+            }
+          })
+      }
+    } else {
+      this.router.navigate([`/app/discussion-forum-v2/community/${notification.message.data.communityId}/${notification.message.data.discussionId}`])
+    }
   }
 
   handleRedirection(notification: any, environment: any, roles: any[], snackBar: any): void {
@@ -160,7 +177,7 @@ export class NotificationsService {
     } else if (notification.category === 'EVENT') {
       this.handleEventRedirection(notification, environment)
     } else if (notification.category === 'DISCUSSION') {
-      this.router.navigate([`/app/discussion-forum-v2/community/${notification.message.data.communityId}/${notification.message.data.discussionId}`])
+      this.handleDiscussionRedirection(notification, environment, roles)
     } else if (notification.category === 'NETWORK') {
       this.handleNetworkRedirection(notification, snackBar)
     } else if (notification?.category === 'CONTENT') {
