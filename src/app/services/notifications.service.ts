@@ -147,22 +147,21 @@ export class NotificationsService {
         console.error('Error while fetching workflow search data', error)
         snackBar.open('Error while fetching approval data')
       })
-    } else if (['ACCEPTED_USER_TRANSFER', 'REJECTED_USER_TRANSFER',
-      'ACCEPTED_USER_PROFILE_VERIFICATION', 'REJECTED_USER_PROFILE_VERIFICATION'].includes(notification.sub_category)) {
-      this.router.navigate([`/app/person-profile/me#profileInfo`])
+    } else if (['TRANSFER_UPDATE', 'PROFILE_UPDATE'].includes(notification.sub_category)) {
+      this.router.navigate([`/app/person-profile/me`])
     }
   }
 
   handleDiscussionRedirection(notification: any, environment: any, roles: any[]): void {
     if (notification.sub_category === 'LEARN_DISCUSSION_POST_COMMENT' || notification.sub_category === 'LEARN_DISCUSSION_POST_REPLY') {
       if (roles.includes('CONTENT_CREATOR')) {
-        let url = `${environment.portalsForNotifications.cbp}/author/content-detail/${notification.message.data.courseId}/overview-v2?preview=true&editMode=true&commentId=7fe10b02-71fb-11f0-92af-c58d19390120`
+        let url = `${environment.portalsForNotifications.cbp}/author/content-detail/${notification.message.data.id}/overview-v2?preview=true&editMode=true&commentId=${notification.message.data.id}`
         window.open(url, '_blank')
       } else {
-        this.router.navigate([`/app/toc/${notification.message.data.courseId}`],
+        this.router.navigate([`/app/toc/${notification.message.data.id}`],
           {
             queryParams: {
-              commentId: "7fe10b02-71fb-11f0-92af-c58d19390120"
+              commentId: notification.message.data.courseId
             }
           })
       }
