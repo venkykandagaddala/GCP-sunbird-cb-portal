@@ -32,6 +32,7 @@ const DEFAULT_API_ENDPOINTS = {
   ENROLLMENT_API(userId: string): string {
     return `/apis/proxies/v8/learner/course/v4/user/enrollment/list/${userId}`
   },
+  ENROLLMENT_DICTIONARY_API: `/apis/proxies/v8/user/v1/learning/dictionary`,
   EXPLORE_API: '/api/course/v1/explore',
   MICRO_CREDENTIALS: '/apis/proxies/v8/promotionalcontent/v1/assignedto/users',
   GetApplicationsById: '/apis/proxies/v8/forms/v2/bulkGetApplicationsById',
@@ -149,6 +150,10 @@ export class GbSearchService {
   }
   recentDeleteByTime(id: any) {
     return this.http.delete(DEFAULT_API_ENDPOINTS.RECENT_DELETE_BY_TIMESTAMP(id))
+  }
+
+  enrollmentDictionary(): Observable<any> {
+    return this.http.get(DEFAULT_API_ENDPOINTS.ENROLLMENT_DICTIONARY_API)
   }
 
   enrollment(request: any, _userId: string): any {
