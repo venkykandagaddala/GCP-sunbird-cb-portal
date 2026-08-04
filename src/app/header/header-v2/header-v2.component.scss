@@ -11,24 +11,32 @@
 
 .mobile-download-app-top-header {
   display: none;
+  background-color: var(--surface-primary);
+  color: var(--text-bandw-black-display);
 }
 
-@media (max-width : 768px) {
+// The banner is phone-only: 600px-1024px is the tablet overlay-drawer range (see
+// BREAKPOINT_QUERIES.TABLET), where the layout has room for the normal header and the
+// download prompt just crowds it. 599.98px is the Breakpoints.XSmall edge the rest of the
+// app uses for "mobile", so this switches off at the same point as the mobile sidebar.
+@media (max-width : 599.98px) {
   .mobile-download-app-top-header {
-    position: fixed;
+    // position: fixed;
     display: flex;
     flex-direction: row;
     height: 32px;
     width: 100%;
-    background-color: #fff;
+    background-color: var(--surface-primary);
+    color: var(--text-bandw-black-display);
     padding: 16px;
     border-bottom: 1px solid #ccc;
-    z-index: 1000;
-    top: 0;
+    // z-index: 1000;
+    // top: 0;
   }
 
   .mobile-download-app-desc {
     margin-left: 8px;
+    color: var(--text-bandw-black-display);
   }
 
   .kb-symbol {
@@ -52,7 +60,7 @@
   }
 
   .cross-mobile-download-app span {
-    color: rgba(0, 0, 0, 0.16)
+    color: var(--text-bandw-black-display);
   }
 
   .mobile-download-app-desc-heading {
@@ -65,7 +73,7 @@
   .mobile-download-app-desc-sub-heading {
     margin: 0 !important;
     font-size: 12px;
-    color: rgba(0, 0, 0, 0.4);
+    color: var(--text-bandw-black-display);
     font-weight: 400;
   }
 

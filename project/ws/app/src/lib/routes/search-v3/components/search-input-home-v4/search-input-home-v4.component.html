@@ -14,7 +14,7 @@
   }
 
   <div class="w-full search relative">
-    <form (submit)="updateQuery(queryControl.value || '')" class="mat-full-radius flex items-center">
+    <form class="mat-full-radius flex items-center" (submit)="onSearchSubmit($event)">
       <mat-form-field class="autocomplete-form w-full" appearance="outline">
         @if (loaderSearching()) {
         <img [src]="SAKSHAMAI_ICON_LOADER" alt="loader" width="16" class="search-home">
@@ -35,18 +35,20 @@
         }
       </mat-form-field>
 
-      <button mat-flat-button type="submit" class="mat-btn-flat global-search"
-        [ngClass]="{'disabled-search-btn': !queryControl.value}">
+      <button mat-flat-button type="button" class="mat-btn-flat global-search"
+        [ngClass]="{'disabled-search-btn': !queryControl.value}" (click)="updateQuery(queryControl.value || '')">
         {{'gyaanKarmayogi.search' | translate}}
       </button>
     </form>
 
-    <div class="search-container" [hidden]="!openSearchTemplate()">
+    <div class="search-container" [hidden]="!openSearchTemplate() || !hasSearchPanelContent">
       <div class="search-results">
+        <!-- Search categories - global-config: components.searchCategories -->
+        @if (searchCategoriesEnabled && categories.length) {
         <div class="search-categories mb-4">
-          <mat-chip-list class="mat-chip-list-content">
+          <mat-chip-listbox class="mat-chip-list-content" [multiple]="false" [hideSingleSelectionIndicator]="true">
             @for (category of categories; track category.value) {
-            <mat-chip [removable]="false" [highlighted]="false" [disableRipple]="true"
+            <mat-chip-option [removable]="false" [highlighted]="false" [disableRipple]="true" [selectable]="false"
               [selected]="category.value === selectedSearchCategory()" (click)="selectSearchCategory(category.value)"
               class="category-chip"
               [ngClass]="{'selected-search-category active': category.value === selectedSearchCategory()}">
@@ -54,13 +56,14 @@
               <mat-icon [svgIcon]="category.icon" class="mr-1 categories-icon"></mat-icon>
               }
               {{ category.label }}
-            </mat-chip>
+            </mat-chip-option>
             }
-          </mat-chip-list>
+          </mat-chip-listbox>
         </div>
+        }
 
-        <!-- Recent Searches -->
-        @if (recentSearches?.length) {
+        <!-- Recent Searches - global-config: components.recentSearch.enabled -->
+        @if (recentSearchesEnabled && recentSearches?.length) {
         <mat-list>
           <div mat-subheader class="flex justify-between">
             <span class="text-sm recent-search-title font-normal">Recent Searches</span>
@@ -83,8 +86,8 @@
         </mat-list>
         }
 
-        <!-- All Search Results -->
-        @if (allSearchResults() && allSearchResults()?.length > 0) {
+        <!-- All Search Results - global-config: components.allSearchResults.enabled -->
+        @if (allSearchResultsEnabled && allSearchResults() && allSearchResults()?.length > 0) {
         <mat-list>
           <div mat-subheader class="flex justify-between mt-4 mb-1">
             <span class="text-sm recent-search-title font-normal">All Search Results</span>
@@ -106,7 +109,7 @@
         </mat-list>
         }
 
-        @if (allSearchResults().length > 0 && queryControl.value) {
+        @if (allSearchResultsEnabled && allSearchResults().length > 0 && queryControl.value) {
         <div class="see-all-results">
           <a mat-button (click)="updateQuery(queryControl.value || '')">See all the results...</a>
         </div>

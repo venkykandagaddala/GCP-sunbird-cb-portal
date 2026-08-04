@@ -203,7 +203,6 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
       const cachedData = await this.indexedDbService.getEnrollmentDetails()
       if (cachedData) {
         this.enrollmentDetails = cachedData
-        console.log('Loaded enrollmentDetails from IndexedDB cache')
       }
     } catch (error) {
       console.error('Failed to load enrollmentDetails from IndexedDB:', error)
@@ -1542,7 +1541,7 @@ export class LearnSearchComponent implements OnInit, OnChanges, OnDestroy {
     const params = this.activated.snapshot.queryParams
 
     this.queryParams = {
-      q: params['q'].trim(),
+      ...(params['q'] ? { q: params['q'].trim() } : {}),
       search: params['search'] || null,
       category: category || null,
       tab: null

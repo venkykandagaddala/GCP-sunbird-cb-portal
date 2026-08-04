@@ -2339,7 +2339,7 @@ ws-widget-btn-page-back-nav .mat-mdc-icon-button {
   .text-base {
     font-size: 1rem !important;
     line-height: 1.5rem !important;
-    color: #000 !important;
+    color: var(--text-bandw-black-display) !important;
   }
 }
 
@@ -2383,4 +2383,9 @@ ws-widget-btn-page-back-nav .mat-mdc-icon-button {
     top: 0 !important;
     right: 0 !important;
   }
+}
+
+// Default UserWay floating icon is replaced by the accessibility button in the header
+#userwayAccessibilityIcon {
+  display: none !important;
 }

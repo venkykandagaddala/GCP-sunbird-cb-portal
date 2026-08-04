@@ -1,4 +1,4 @@
-import { Component, computed, effect, input, OnDestroy, OnInit, output, signal } from '@angular/core'
+import { Component, computed, effect, input, OnChanges, OnDestroy, OnInit, output, signal, SimpleChanges } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser'
 import { Router, NavigationEnd, NavigationStart, RouterModule } from '@angular/router'
@@ -22,14 +22,16 @@ import {
 
 import * as _ from 'lodash'
 import { LibNotificationsService } from '@sunbird-cb/notification'
-import { filter, Subscription } from 'rxjs'
+import { filter, map, Subscription } from 'rxjs'
 import { UrlService } from '../../shared/url.service'
 import { NotificationsService } from '../../services/notifications.service'
+import { UserRestrictionService } from '../../services/user-restriction.service'
 import { HeaderModule } from '../../header/header.module'
 import { SearchInputHomeV4Component } from '../../../../project/ws/app/src/lib/routes/search-v3/components/search-input-home-v4/search-input-home-v4.component'
 import { TopRightNavBarV2Component } from '../top-right-nav-bar-v2/top-right-nav-bar-v2.component'
 import { BtnFeatureV2Component } from '@sunbird-cb/consumption'
 import { ThemeService } from '@sunbird-cb/design-system'
+import { BreakpointObserver } from '@angular/cdk/layout'
 
 @Component({
   selector: 'ws-app-nav-bar-v2',
@@ -51,13 +53,18 @@ import { ThemeService } from '@sunbird-cb/design-system'
   templateUrl: './app-nav-bar-v2.component.html',
   styleUrl: './app-nav-bar-v2.component.scss'
 })
-export class AppNavBarV2Component implements OnInit, OnDestroy {
+export class AppNavBarV2Component implements OnInit, OnChanges, OnDestroy {
   // Inputs using Angular 20 input() signal
   mode = input<'top' | 'bottom'>('top');
+  showKarmaLeaderboard = input<boolean>(false)
   headerFooterConfigData = input<any>();
   leftNavBarOpen = input<boolean>(false);
 
   viewAchivements = output<boolean>()
+  // Matches BREAKPOINT_QUERIES.TABLET in sb-uic-dynamic-sidebar and isTabView$ in root
+  isTabView$ = this.breakpointObserver
+    .observe(['(min-width: 600px) and (max-width: 1024px)'])
+    .pipe(map(state => state.matches))
 
   // State signals
   hideKPOnNav = signal(false);
@@ -76,6 +83,7 @@ export class AppNavBarV2Component implements OnInit, OnDestroy {
   showLangDropdown = signal(true);
   isTourGuideAvailable = signal(false);
   isTourGuideClosed = signal(false);
+  activeItemKey = signal('')
 
   // Tracks the router url; kept as a signal so computeds below re-evaluate on navigation
   currentHref = signal(window.location.href);
@@ -151,7 +159,9 @@ export class AppNavBarV2Component implements OnInit, OnDestroy {
     private notificationsService: NotificationsService,
     private libNotificationsService: LibNotificationsService,
     private domainConfSvc: DomainConfService,
-    private themeSvc: ThemeService
+    private themeSvc: ThemeService,
+    private restrictionSvc: UserRestrictionService,
+    private breakpointObserver: BreakpointObserver
   ) {
     this.btnAppsConfig = { ...this.basicBtnAppsConfig }
 
@@ -208,6 +218,12 @@ export class AppNavBarV2Component implements OnInit, OnDestroy {
     })
   }
 
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes.showKarmaLeaderboard && changes.showKarmaLeaderboard.currentValue === false && this.activeItemKey() === 'achievements') {
+      this.activeItemKey.set('')
+    }
+  }
+
   ngOnInit() {
     // this.setPrimaryConfig()
     if (this.configSvc) {
@@ -219,6 +235,8 @@ export class AppNavBarV2Component implements OnInit, OnDestroy {
         this.displayLogo()
       }, this.logoDisplayTime)
     }
+
+    this.setActiveRouteFromUrl(this.router.url)
 
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
@@ -238,16 +256,8 @@ export class AppNavBarV2Component implements OnInit, OnDestroy {
         this.filteredPrimaryNavbarConfig = this.primaryNavbarConfig
         const themeMode = this.themeSvc.currentTheme
         this.themeSvc.setTheme(themeMode)
-        this.activeRoute.set('home')
-      } else if (event.url.includes('/page/explore')) {
-        this.activeRoute.set('explorer')
-      } else if (event.url.includes('app/globalsearch') || event.url.includes('/app/search/home')) {
-        this.activeRoute.set('search')
-      } else if (event.url.includes('app/careers')) {
-        this.activeRoute.set('Career')
-      } else if (event.url.includes('app/seeAll?key=continueLearning')) {
-        this.activeRoute.set('my learnings')
       }
+      this.setActiveRouteFromUrl(event.url)
       if (!event.url.includes('/page/home')) {
         this.filteredPrimaryNavbarConfig = this.removeThemeToggleFromConfig(this.primaryNavbarConfig)
         this.themeSvc.applyTheme('light')
@@ -301,18 +311,9 @@ export class AppNavBarV2Component implements OnInit, OnDestroy {
       this.previousUrl.set(previousUrl)
     })
 
-    let isNotMyUser = false
-    let isIgotOrg = false
-
-    if (this.configSvc?.unMappedUser?.profileDetails?.profileStatus) {
-      isNotMyUser = this.configSvc.unMappedUser.profileDetails.profileStatus.toLowerCase() === 'not-my-user'
-    }
-
-    if (this.configSvc?.unMappedUser?.profileDetails?.employmentDetails?.departmentName) {
-      isIgotOrg = this.configSvc.unMappedUser.profileDetails.employmentDetails.departmentName.toLowerCase() === 'igot'
-    }
-
-    if (isNotMyUser && isIgotOrg) {
+    // NOT-MY-USER alone disables the nav now — it used to also require the 'igot' holding
+    // org, so disowned users of any other org kept a fully working bottom nav
+    if (this.restrictionSvc.isNotMyUser) {
       this.disableMenu.set(true)
       this.fetchEnrollmentList()
     } else {
@@ -568,8 +569,15 @@ export class AppNavBarV2Component implements OnInit, OnDestroy {
   }
 
   bottomNavClick(item: any) {
+    this.activeItemKey.set('')
     if (item?.config?.key === 'achievements') {
       this.viewAchivements.emit(true)
+      this.activeItemKey.set(item?.config?.key)
+    } else if (item?.config?.key === 'continueLearning') {
+      this.router.navigate(['/app/seeAll/new'], {
+        queryParams: { key: 'continueLearning', tabSelected: 'Contents', pillSelected: 'inprogress' },
+      })
+      this.configSvc.openExploreMenuForMWeb.next(false)
     } else {
       this.redirectToPath(item?.config)
     }
@@ -586,7 +594,7 @@ export class AppNavBarV2Component implements OnInit, OnDestroy {
 
   openExploreMenu() {
     this.activeRoute.set('explore')
-    this.configSvc.openExploreMenuForMWeb.next(true)
+    this.router.navigate(['/app/explore'])
   }
 
   getKarmaCount() {
@@ -635,6 +643,37 @@ export class AppNavBarV2Component implements OnInit, OnDestroy {
   fetchEnrollmentList() {
     const userId = this.configSvc.userProfile?.userId || ''
     this.userSvc.fetchUserBatchList(userId).subscribe()
+  }
+
+  setActiveRouteFromUrl(url: string) {
+    let activeRoute = ''
+    if (url.includes('/page/home')) {
+      activeRoute = 'home'
+    } else if (url.includes('/app/explore') || url.includes('/page/explore')
+      || url.includes('tab=explore-content')) {
+      activeRoute = 'explore'
+    } else if (url.includes('app/globalsearch') || url.includes('/app/search/home')) {
+      activeRoute = 'search'
+    } else if (url.includes('app/careers')) {
+      activeRoute = 'Career'
+    } else if (url.includes('app/seeAll') && url.includes('key=continueLearning')) {
+      activeRoute = 'my learnings'
+    }
+
+    if (activeRoute) {
+      this.activeItemKey.set('')
+      this.activeRoute.set(activeRoute)
+    }
+  }
+
+  isActive(itemConfig: any) {
+    if (itemConfig && this.activeItemKey() && this.activeItemKey() === itemConfig.key) {
+      return true
+    } else if (itemConfig.label === this.activeRoute() && !this.activeItemKey()) {
+      return true
+    }
+
+    return false
   }
 
   ngOnDestroy() {

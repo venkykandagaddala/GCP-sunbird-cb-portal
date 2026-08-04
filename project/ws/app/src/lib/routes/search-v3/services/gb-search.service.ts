@@ -36,6 +36,7 @@ const DEFAULT_API_ENDPOINTS = {
   EXPLORE_API: '/api/course/v1/explore',
   MICRO_CREDENTIALS: '/apis/proxies/v8/promotionalcontent/v1/assignedto/users',
   GetApplicationsById: '/apis/proxies/v8/forms/v2/bulkGetApplicationsById',
+  ENROLLMENT_DICTIONARY_API: `/apis/proxies/v8/user/v1/learning/dictionary`,
 }
 
 @Injectable({
@@ -57,6 +58,9 @@ export class GbSearchService {
 
   fetchSearchData(request: any): Observable<any> {
     const url = this.domainConfSvc.getApiUrl('search', 'searchV6', DEFAULT_API_ENDPOINTS.SEARCH_V6)
+    if (!url) {
+      return of(null)
+    }
     return this.http.post<any>(url, request)
   }
   fetchSearchDataByCategory(request: any): Observable<any> {
@@ -111,6 +115,9 @@ export class GbSearchService {
 
   getApplicationsById(formBody: any) {
     const url = this.domainConfSvc.getApiUrl('content', 'applicationsById', DEFAULT_API_ENDPOINTS.GetApplicationsById)
+    if (!url) {
+      return of(null)
+    }
     return this.http.post<any>(url, formBody)
   }
 
@@ -128,27 +135,48 @@ export class GbSearchService {
 
   searchResource(params: SearchV4Request): Promise<any> {
     const url = this.domainConfSvc.getApiUrl('search', 'searchV6', DEFAULT_API_ENDPOINTS.SEARCH_V6)
+    if (!url) {
+      return Promise.resolve(null)
+    }
     return this.http.post(url, params).toPromise()
   }
 
   nlpSearch(params: SearchNLP): Promise<any> {
     const url = this.domainConfSvc.getApiUrl('search', 'nlp', DEFAULT_API_ENDPOINTS.SEARCH_NLP)
+    if (!url) {
+      return Promise.resolve(null)
+    }
     return this.http.post(url, params).toPromise()
   }
+  // getApiUrl returns '' when the api is disabled in global-config, so each of these bails out the
+  // same way nlpSearch does - without the check a disabled api posts to the app's own origin
   recentCreate(req: any): Promise<any> {
     const url = this.domainConfSvc.getApiUrl('search', 'recentCreate', DEFAULT_API_ENDPOINTS.RECENT_CREATE)
+    if (!url) {
+      return Promise.resolve(null)
+    }
     return this.http.post(url, req).toPromise()
   }
-  recentRead() {
+  recentRead(): Observable<any> {
     const url = this.domainConfSvc.getApiUrl('search', 'recentRead', DEFAULT_API_ENDPOINTS.RECENT_READ)
+    if (!url) {
+      return of(null)
+    }
     return this.http.get(url)
   }
 
-  recentDeleteByUser() {
+  recentDeleteByUser(): Observable<any> {
     const url = this.domainConfSvc.getApiUrl('search', 'recentDelete', DEFAULT_API_ENDPOINTS.RECENT_DELETE_BY_USERID)
+    if (!url) {
+      return of(null)
+    }
     return this.http.delete(url)
   }
-  recentDeleteByTime(id: any) {
+  // no dedicated config key for the per-timestamp delete, so it rides on recentDelete
+  recentDeleteByTime(id: any): Observable<any> {
+    if (!this.domainConfSvc.isApiEnabled('search', 'recentDelete')) {
+      return of(null)
+    }
     return this.http.delete(DEFAULT_API_ENDPOINTS.RECENT_DELETE_BY_TIMESTAMP(id))
   }
 
@@ -187,6 +215,10 @@ export class GbSearchService {
   microCredentialsSearch(): Observable<any> {
     const url = this.domainConfSvc.getApiUrl('content', 'microCredentials', DEFAULT_API_ENDPOINTS.MICRO_CREDENTIALS)
     return this.http.get<any>(url)
+  }
+
+  enrollmentDictionary(): Observable<any> {
+    return this.http.get(DEFAULT_API_ENDPOINTS.ENROLLMENT_DICTIONARY_API)
   }
 
 }
